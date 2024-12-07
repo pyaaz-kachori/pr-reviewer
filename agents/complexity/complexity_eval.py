@@ -1,5 +1,11 @@
 from llm import call_llm
 from agents.complexity.tech_stack import tech_stack
+from pydantic import BaseModel
+import json
+
+class Complexity(BaseModel):
+    story_points: int
+    explaination: str | None
 
 def complexity(pr_title, discussions, repo_url):
     dependencies = tech_stack(repo_url)
@@ -13,7 +19,17 @@ Discussions:
 Technical Dependencies:
 {dependencies}
 
-Output only an integer in form of story points.
+Give the output in form of json dump following the provided pydantic models
+class Complexity(BaseModel):
+    story_points: int
+    explaination: str | None
+
+Do not provide any output other than json dump.
 """
     response = call_llm(prompt)
-    return response
+    try:
+        fin = Complexity(**json.loads(response[7:-3]))
+        return fin
+    except:
+        print(response)
+        return None
