@@ -17,7 +17,12 @@ class Commit(BaseModel):
 class PRModel(BaseModel):
     url: str
     title: str
-    contributor: str | None
+    contributor: str
     discussions: List[Comment]
     changes: List[Patch]
-    commits: List[Commit] | None
+    # commits: List[Commit] | None
+
+class Response(BaseModel):
+    url: str
+    review_score: int
+    username: str

@@ -2,19 +2,20 @@ from llm import call_llm
 from agents.complexity.tech_stack import tech_stack
 from pydantic import BaseModel
 import json
+from models.models import PRModel
 
 class Complexity(BaseModel):
     story_points: int
     explaination: str | None
 
-def complexity(pr_title, discussions, repo_url):
-    dependencies = tech_stack(repo_url)
+def complexity_eval(pr: PRModel):
+    dependencies = tech_stack(pr.url)
     prompt = f"""
 You are a experienced open source developer and maintainer and are tasked with assigning story points to the task to be done.
-For the task: {pr_title} evaluate the story points needed to solve it based on the discussions and technial details of the repo given below.
+For the task: {pr.title} evaluate the story points needed to solve it based on the discussions and technial details of the repo given below.
 
 Discussions:
-{discussions}
+{pr.discussions}
 
 Technical Dependencies:
 {dependencies}
@@ -31,5 +32,5 @@ Do not provide any output other than json dump.
         fin = Complexity(**json.loads(response[7:-3]))
         return fin
     except:
-        print(response)
+        print(f"Failed at complexity agent")
         return None

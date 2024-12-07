@@ -8,5 +8,4 @@ Find out the tech stack and packages used in this github repository {url} using 
 {docs}
 
 """)
-    print(response)
     return response
