@@ -26,3 +26,4 @@ class Response(BaseModel):
     url: str
     review_score: int
     username: str
+    explanation: str

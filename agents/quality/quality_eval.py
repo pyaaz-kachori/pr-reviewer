@@ -2,6 +2,12 @@ from agents.quality.code_smells import code_smells_agent
 from agents.quality.spams import spams_agent
 from models.models import PRModel
 from llm import call_llm
+from pydantic import BaseModel
+import json
+
+class Quality(BaseModel):
+    score: int
+    explanation: str | None
 
 def quality_eval(pr: PRModel):
     smells = code_smells_agent(pr.changes)
@@ -20,19 +26,25 @@ Indicators of spam PR are as follows:
 {spams.model_dump_json()}
 
 Ensure that severity of smells and spams have a heavy impact on score deduction due to issues.
-Output only an integer, it being the score out of 1000. Dont output any additional text.
+
+Give the output in form of json dump following the provided pydantic models
+class Quality(BaseModel):
+    score: int
+    explanation: str | None
+
+Do not provide any output other than json dump.
 """
     response = call_llm(prompt)
     try:
-        return int(response)
+        return Quality(**json.loads(response[7:-3]))
     except:
         correction_prompt = f"""
 From the following text find out final score, only output a single integer:
 {response}
 """
         try:
-            score = int(call_llm(correction_prompt))
+            score = Quality(score=call_llm(correction_prompt), explanation="")
             return score
         except:
             print("Failed at evaluating score")
-            return None
+            return Quality(score=100, explanation="")

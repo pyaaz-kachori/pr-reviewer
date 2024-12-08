@@ -6,7 +6,7 @@ from models.models import PRModel
 
 class Complexity(BaseModel):
     story_points: int
-    explaination: str | None
+    explanation: str | None
 
 def complexity_eval(pr: PRModel):
     dependencies = tech_stack(pr.url)
@@ -23,7 +23,7 @@ Technical Dependencies:
 Give the output in form of json dump following the provided pydantic models
 class Complexity(BaseModel):
     story_points: int
-    explaination: str | None
+    explanation: str | None
 
 Do not provide any output other than json dump.
 """
@@ -33,4 +33,4 @@ Do not provide any output other than json dump.
         return fin
     except:
         print(f"Failed at complexity agent")
-        return None
+        return Complexity(story_points=1, explanation="")
