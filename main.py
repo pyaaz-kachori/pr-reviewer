@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from models.models import PRModel, Response
+from llm import call_llm
 
 from fastapi import Request, status
 from fastapi.encoders import jsonable_encoder
@@ -25,8 +26,22 @@ async def root():
 @app.post("/pr")
 async def check_pr(pr: PRModel):
     # Score = semantics + 1000 - code smells wale negaives * complexity
-    complexity = complexity_eval(pr).story_points
+    complexity = complexity_eval(pr)
     quality = quality_eval(pr)
-    response = Response(url=pr.url, review_score=complexity*quality, username=pr.contributor)
+    try:
+        explanation = call_llm(f"""
+Summarize the complexity and quality analysis of PR done by respective agents in a concise and clear way.
+
+Complexity analysis:    
+{complexity.explanation}        
+
+Quality analysis:
+{quality.explanation}
+
+Output only the summary.
+""")
+    except:
+        explanation = complexity.explanation + "\n" + quality.explanation
+    response = Response(url=pr.url, review_score=(complexity.story_points)*(quality.score), username=pr.contributor, explanation=explanation)
     print(response.model_dump_json())
     return response.model_dump_json()
